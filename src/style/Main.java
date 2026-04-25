@@ -70,7 +70,7 @@ public class Main extends Application {
         Scene scene = new Scene(root, 800, 500);
 
         scene.getStylesheets().add(
-                Main.class.getResource("style.css").toExternalForm()
+                Main.class.getResource("styleJ.css").toExternalForm()
         );
 
         stage.setTitle("JavaFX Firebase App");

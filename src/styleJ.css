@@ -1,0 +1,22 @@
+.sidebar {
+    -fx-background-color: #2c3e50;
+    -fx-padding: 20;
+}
+
+.title {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+}
+
+.button {
+    -fx-pref-width: 120;
+}
+
+.page {
+    -fx-padding: 20;
+}
+
+.header {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
