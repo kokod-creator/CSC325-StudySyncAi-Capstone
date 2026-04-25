@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER"
+      spacing="15"
+      styleClass="page"
+      xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/17.0.12">
+
+    <Label styleClass="header" text="Notes Input" />
+
+    <TextArea fx:id="notesArea"
+              prefHeight="300"
+              promptText="Paste your lecture notes here..." />
+
+    <HBox spacing="10">
+        <Button fx:id="UploadButton" text="Upload File" />
+        <Button fx:id="GenqButton" text="Generate Quiz" />
+    </HBox>
+
+</VBox>

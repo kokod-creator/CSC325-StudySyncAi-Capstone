@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15"
+      alignment="TOP_CENTER"
+      styleClass="page"
+      xmlns:fx="http://javafx.com/fxml">
+
+    <Label text="Saved Quizzes" styleClass="header"/>
+
+    <ListView fx:id="quizList" prefHeight="300"/>
+
+    <HBox spacing="10">
+        <Button text="Open Quiz"/>
+        <Button text="Delete Quiz"/>
+    </HBox>
+
+</VBox>

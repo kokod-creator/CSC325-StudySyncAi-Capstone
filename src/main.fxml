@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            fx:controller="org.example.QuizApplication.Controller">
+
+    <!-- Sidebar -->
+    <left>
+        <VBox prefHeight="86.0"
+              prefWidth="141.0"
+              spacing="20"
+              styleClass="sidebar">
+            <Label styleClass="title" text="Quiz App" />
+
+            <Button fx:id="notesButton"
+                    text="Notes"
+                    onAction="#showNotes"
+                    prefHeight="45.0"
+                    prefWidth="58.0"/>
+            <Button fx:id="quizButton"
+                    text="Quizzes"
+                    onAction="#showQuizzes"/>
+        </VBox>
+    </left>
+
+    <!-- Content Area -->
+    <center>
+        <StackPane fx:id="contentArea" />
+    </center>
+
+</BorderPane>
