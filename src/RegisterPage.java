@@ -4,6 +4,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import com.app.navigation.SceneManager;
 
 public class RegisterPage {
 
@@ -86,7 +87,7 @@ public class RegisterPage {
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Guest session started.");
                 System.out.println("Guest session started for: " + name);
-                // stage.setScene(new DashboardPage().createScene(stage));
+                SceneManager.showDashboard();
                 return;
             }
 
@@ -111,7 +112,7 @@ public class RegisterPage {
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Registration successful.");
                 System.out.println("Registered student: " + result.getEmail());
-                // stage.setScene(new DashboardPage().createScene(stage));
+                SceneManager.showDashboard();
             } else {
                 messageLabel.setText(result.getMessage());
             }
@@ -140,6 +141,11 @@ public class RegisterPage {
                 messageLabel
         );
 
-        return new Scene(layout, 420, 620);
+        Scene scene = new Scene(layout, 420, 620);
+        java.net.URL css = getClass().getResource("style/style.css");
+        if (css != null) {
+            scene.getStylesheets().add(css.toExternalForm());
+        }
+        return scene;
     }
 }

@@ -12,7 +12,7 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 
-public class Main extends Application {
+public class StyleDemoApp extends Application {
 
     @Override
     public void start(Stage stage) {
@@ -70,7 +70,7 @@ public class Main extends Application {
         Scene scene = new Scene(root, 800, 500);
 
         scene.getStylesheets().add(
-                Main.class.getResource("styleJ.css").toExternalForm()
+                StyleDemoApp.class.getResource("styleJ.css").toExternalForm()
         );
 
         stage.setTitle("JavaFX Firebase App");

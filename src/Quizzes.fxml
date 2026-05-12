@@ -13,11 +13,6 @@
 
     <Label text="Saved Quizzes" styleClass="header"/>
 
-    <ListView fx:id="quizList" prefHeight="300"/>
-
-    <HBox spacing="10">
-        <Button text="Open Quiz"/>
-        <Button text="Delete Quiz"/>
-    </HBox>
+    <ListView prefHeight="300"/>
 
 </VBox>

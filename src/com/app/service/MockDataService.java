@@ -10,7 +10,7 @@ public class MockDataService {
     public static List<Course> courses = new ArrayList<>();
     public static List<Document> documents = new ArrayList<>();
 
-    // 🔽 STATIC DATA (already exists)
+    //  STATIC DATA (already exists)
     static {
         courses.add(new Course("1", "CSC325"));
         courses.add(new Course("2", "BIO101"));
@@ -26,7 +26,7 @@ public class MockDataService {
         documents.add(new Document("Agile Methodologies.pptx", "Slides", "CSC325"));
     }
 
-    // ✅ ADD YOUR METHOD HERE (outside static block)
+    //  ADD YOUR METHOD HERE (outside static block)
     public static List<Document> getRecentDocuments(int limit) {
         int size = documents.size();
 

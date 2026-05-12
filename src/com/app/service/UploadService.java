@@ -1,3 +1,5 @@
+package com.app.service;
+
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -13,7 +15,7 @@ public class UploadService {
 
         chooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Documents and Slides",
-                        "*.pdf", "*.doc", "*.docx", "*.ppt", "*.pptx"),
+                        "*.pdf", "*.doc", "*.docx", "*.ppt", "*.pptx", "*.txt"),
                 new FileChooser.ExtensionFilter("All Files", "*.*")
         );
 

@@ -28,7 +28,7 @@ public class FirebaseService {
                 FirebaseApp.initializeApp(options);
             }
 
-            System.out.println("🔥 Firebase Connected Successfully!");
+            System.out.println(" Firebase Connected Successfully!");
 
         } catch (Exception e) {
             e.printStackTrace();

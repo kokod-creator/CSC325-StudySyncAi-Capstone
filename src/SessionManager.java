@@ -19,6 +19,10 @@ public class SessionManager {
         return guest;
     }
 
+    public static boolean isStudent() {
+        return !guest && userEmail != null;
+    }
+
     public static String getUserEmail() {
         return userEmail;
     }

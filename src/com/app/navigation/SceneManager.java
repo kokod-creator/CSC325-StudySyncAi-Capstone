@@ -12,6 +12,10 @@ public class SceneManager {
         stage.setTitle("StudySpace");
     }
 
+    public static Stage getStage() {
+        return stage;
+    }
+
     private static void applyBasicStyle(Scene scene) {
         // Add a basic inline stylesheet to all scenes
         scene.getStylesheets().add(getInlineStyleSheet());
@@ -72,6 +76,20 @@ public class SceneManager {
 
     public static void showDocuments() {
         DocumentsView view = new DocumentsView();
+        Scene scene = new Scene(view, 900, 600);
+        applyBasicStyle(scene);
+        stage.setScene(scene);
+    }
+
+    public static void showQuiz() {
+        QuizView view = new QuizView();
+        Scene scene = new Scene(view, 900, 600);
+        applyBasicStyle(scene);
+        stage.setScene(scene);
+    }
+
+    public static void showSummary() {
+        SummaryView view = new SummaryView();
         Scene scene = new Scene(view, 900, 600);
         applyBasicStyle(scene);
         stage.setScene(scene);

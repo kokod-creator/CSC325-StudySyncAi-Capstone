@@ -26,11 +26,15 @@ public class DashboardView extends BorderPane {
         Button uploadBtn = new Button("📤 Upload");
         Button coursesBtn = new Button("📚 Courses");
         Button documentsBtn = new Button("📄 Documents");
+        Button quizBtn = new Button("🧠 Quiz");
+        Button summaryBtn = new Button("📝 Summary");
 
         Button[] buttons = {
                 uploadBtn,
                 coursesBtn,
-                documentsBtn
+                documentsBtn,
+                quizBtn,
+                summaryBtn
         };
 
         for (Button btn : buttons) {
@@ -41,6 +45,8 @@ public class DashboardView extends BorderPane {
         uploadBtn.setOnAction(e -> SceneManager.showUpload());
         coursesBtn.setOnAction(e -> SceneManager.showCourses());
         documentsBtn.setOnAction(e -> SceneManager.showDocuments());
+        quizBtn.setOnAction(e -> SceneManager.showQuiz());
+        summaryBtn.setOnAction(e -> SceneManager.showSummary());
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -57,6 +63,8 @@ public class DashboardView extends BorderPane {
                 uploadBtn,
                 coursesBtn,
                 documentsBtn,
+                quizBtn,
+                summaryBtn,
                 spacer,
                 signOut
         );

@@ -4,6 +4,9 @@ import com.app.model.Course;
 import com.app.model.Document;
 import com.app.navigation.SceneManager;
 import com.app.service.MockDataService;
+import com.app.service.UploadService;
+
+import java.io.File;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Pos;
@@ -35,20 +38,43 @@ public class UploadView extends BorderPane {
 
         Label dropText = new Label("📁 Drop file here or click to browse");
         Label fileInfo = new Label("PDF, PPTX, DOCX up to 50MB");
+        Label selectedLabel = new Label();
 
-        dropArea.getChildren().addAll(dropText, fileInfo);
-
-        dropArea.setOnMouseClicked(e -> {
-            Alert info = new Alert(
-                    Alert.AlertType.INFORMATION,
-                    "File picker would open here."
-            );
-            info.showAndWait();
-        });
+        dropArea.getChildren().addAll(dropText, fileInfo, selectedLabel);
 
         // Document Title
         TextField docTitle = new TextField();
         docTitle.setPromptText("Document Title");
+
+        // Document Type (declared early so the drop area can prefill it)
+        ComboBox<String> typeBox = new ComboBox<>();
+        typeBox.setItems(
+                FXCollections.observableArrayList(
+                        "PDF",
+                        "Slides",
+                        "Notes"
+                )
+        );
+        typeBox.setPromptText("Document Type");
+
+        final File[] selectedHolder = new File[1];
+
+        dropArea.setOnMouseClicked(e -> {
+            File chosen = UploadService.chooseFile(SceneManager.getStage());
+            if (chosen == null) {
+                return;
+            }
+            selectedHolder[0] = chosen;
+            selectedLabel.setText("Selected: " + chosen.getName());
+
+            if (docTitle.getText().trim().isEmpty()) {
+                docTitle.setText(chosen.getName());
+            }
+            String inferred = inferType(chosen.getName());
+            if (inferred != null && typeBox.getValue() == null) {
+                typeBox.setValue(inferred);
+            }
+        });
 
         // Course Selection
         ComboBox<String> courseBox = new ComboBox<>();
@@ -59,32 +85,20 @@ public class UploadView extends BorderPane {
 
         courseBox.setPromptText("Select a course...");
 
-        // Document Type
-        ComboBox<String> typeBox = new ComboBox<>();
-
-        typeBox.setItems(
-                FXCollections.observableArrayList(
-                        "PDF",
-                        "Slides",
-                        "Notes"
-                )
-        );
-
-        typeBox.setPromptText("Document Type");
-
         // Upload Button
         Button upload = new Button("Upload Document");
         upload.getStyleClass().add("button");
 
         upload.setOnAction(e -> {
 
-            if (docTitle.getText().trim().isEmpty()
+            if (selectedHolder[0] == null
+                    || docTitle.getText().trim().isEmpty()
                     || courseBox.getValue() == null
                     || typeBox.getValue() == null) {
 
                 Alert error = new Alert(
                         Alert.AlertType.ERROR,
-                        "Please fill all fields."
+                        "Please choose a file and fill all fields."
                 );
 
                 error.showAndWait();
@@ -129,5 +143,13 @@ public class UploadView extends BorderPane {
         );
 
         setCenter(box);
+    }
+
+    private static String inferType(String fileName) {
+        String lower = fileName.toLowerCase();
+        if (lower.endsWith(".pdf")) return "PDF";
+        if (lower.endsWith(".ppt") || lower.endsWith(".pptx")) return "Slides";
+        if (lower.endsWith(".doc") || lower.endsWith(".docx") || lower.endsWith(".txt")) return "Notes";
+        return null;
     }
 }

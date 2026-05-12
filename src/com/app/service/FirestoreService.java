@@ -10,7 +10,9 @@ import java.util.concurrent.ExecutionException;
 
 public class FirestoreService {
 
-    private static final Firestore db = FirestoreClient.getFirestore();
+    private static Firestore db() {
+        return FirestoreClient.getFirestore();
+    }
 
     // =====================
     // INSERT DATA
@@ -25,7 +27,7 @@ public class FirestoreService {
             data.put("courseCode", doc.courseCode);
             data.put("timestamp", FieldValue.serverTimestamp());
 
-            db.collection("documents")
+            db().collection("documents")
                     .add(data)
                     .get(); // wait for completion
 
@@ -46,7 +48,7 @@ public class FirestoreService {
         try {
 
             ApiFuture<QuerySnapshot> future =
-                    db.collection("documents").get();
+                    db().collection("documents").get();
 
             List<QueryDocumentSnapshot> documents = future.get().getDocuments();
 
