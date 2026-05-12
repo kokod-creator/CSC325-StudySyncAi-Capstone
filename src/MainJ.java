@@ -7,10 +7,10 @@ public class MainJ extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
         Scene scene = new Scene(loader.load());
 
-        scene.getStylesheets().add(getClass().getResource("styleJ.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/styleJ.css").toExternalForm());
 
         stage.setTitle("Quiz Generator App");
         stage.setScene(scene);
@@ -20,6 +20,6 @@ public class MainJ extends Application {
     }
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 }

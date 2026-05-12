@@ -5,7 +5,14 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx/17.0.12"
-            fx:controller="org.example.QuizApplication.Controller">
+            fx:controller="Controller">
+
+            <!--
+            was previously: fx:controller="org.example.QuizApplication.Controller"
+            changed to:     fx:controller="Controller">
+            reason: org.example.QuizApplication. no longer exists after pushing my code (quizzes,notes UI)
+            -->
+
 
     <!-- Sidebar -->
     <left>

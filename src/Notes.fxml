@@ -3,21 +3,32 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER"
-      spacing="15"
-      styleClass="page"
-      xmlns:fx="http://javafx.com/fxml/1"
-      xmlns="http://javafx.com/javafx/17.0.12">
+<VBox alignment="TOP_CENTER" spacing="15" styleClass="page" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="NotesController">
+
+    <!-- Summary section -->
+    <Label styleClass="header" text="Generated Summary" />
+
+    <TextArea fx:id="summaryArea" editable="false" prefHeight="139.0" prefWidth="478.0" wrapText="true" />
 
     <Label styleClass="header" text="Notes Input" />
 
-    <TextArea fx:id="notesArea"
-              prefHeight="300"
-              promptText="Paste your lecture notes here..." />
+    <!-- Note title -->
+    <TextField fx:id="noteTitleField" promptText="Enter note title" />
 
+    <!-- Main notes area -->
+    <TextArea fx:id="notesArea" prefHeight="190.0" prefWidth="478.0" promptText="Paste your lecture notes here..." wrapText="true" />
+
+    <!-- Buttons -->
     <HBox spacing="10">
-        <Button fx:id="UploadButton" text="Upload File" />
-        <Button fx:id="GenqButton" text="Generate Quiz" />
+
+        <Button fx:id="UploadButton" onAction="#uploadFile" text="Upload File" />
+
+        <Button onAction="#saveNotes" text="Save Notes" />
+
+        <Button onAction="#loadNotes" text="Load Notes" />
+
+        <Button fx:id="GenqButton" onAction="#generateSummary" text="Generate Summary" />
+
     </HBox>
 
 </VBox>
