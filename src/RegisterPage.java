@@ -5,6 +5,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.app.navigation.SceneManager;
+import com.app.service.UserProfileService;
+import com.app.service.UserSession;
 
 public class RegisterPage {
 
@@ -84,6 +86,7 @@ public class RegisterPage {
 
             if (guestRadio.isSelected()) {
                 SessionManager.startGuestSession();
+                UserSession.setUsername(name);
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Guest session started.");
                 System.out.println("Guest session started for: " + name);
@@ -109,6 +112,8 @@ public class RegisterPage {
 
             if (result.isSuccess()) {
                 SessionManager.startStudentSession(result.getEmail(), result.getIdToken());
+                UserSession.setUsername(name);
+                UserProfileService.saveName(result.getLocalId(), name, result.getEmail());
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Registration successful.");
                 System.out.println("Registered student: " + result.getEmail());

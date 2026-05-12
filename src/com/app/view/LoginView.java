@@ -1,7 +1,7 @@
 package com.app.view;
 
 import com.app.navigation.SceneManager;
-import javafx.geometry.Pos;
+import com.app.service.UserSession;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
@@ -18,7 +18,10 @@ public class LoginView extends BorderPane {
         password.setPromptText("Password");
         Button login = new Button("Login");
         login.getStyleClass().add("button");
-        login.setOnAction(e -> SceneManager.showDashboard());
+        login.setOnAction(e -> {
+            UserSession.setUsername(username.getText());
+            SceneManager.showDashboard();
+        });
         box.getChildren().addAll(title, username, password, login);
         setCenter(box);
     }

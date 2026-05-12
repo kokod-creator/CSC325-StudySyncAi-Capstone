@@ -169,10 +169,10 @@ public class StudyController {
     }
 
     private void refreshQuotaDisplay() {
-        quotaManager.getQuotaStatus(new QuotaManager.QuotaCallback() {
+        quotaManager.getQuotaStatus(QuotaManager.Resource.QUIZ, new QuotaManager.QuotaCallback() {
             @Override
             public void onResult(boolean allowed, int usedCount, int maxCount) {
-                quotaText = "Uses: " + usedCount + " / " + maxCount;
+                quotaText = "Quizzes: " + usedCount + " / " + maxCount;
             }
 
             @Override

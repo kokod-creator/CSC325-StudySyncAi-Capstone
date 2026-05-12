@@ -31,6 +31,7 @@ import java.util.List;
 public class QuizManager {
 
     public static final int MAX_SHUFFLES = 3;
+    public static final int QUESTIONS_PER_QUIZ = 15;
 
     private int shuffleCount = 0;
     private List<QuizQuestion> currentQuestions = new ArrayList<>();
@@ -80,7 +81,7 @@ public class QuizManager {
 
 
     public void generateQuiz(String topicText, QuizCallback callback) {
-        quotaManager.checkAndIncrement(new QuotaManager.QuotaCallback() {
+        quotaManager.checkAndIncrement(QuotaManager.Resource.QUIZ, new QuotaManager.QuotaCallback() {
             @Override
             public void onResult(boolean allowed, int usedCount, int maxCount) {
                 if (!allowed) {
@@ -144,25 +145,42 @@ public class QuizManager {
         return new ArrayList<>(currentQuestions);
     }
 
+    /** Load a previously-generated quiz back into the manager without using quota. */
+    public void loadQuestions(List<QuizQuestion> questions, int existingShuffleCount) {
+        this.currentQuestions = questions == null ? new ArrayList<>() : new ArrayList<>(questions);
+        this.shuffleCount = Math.max(0, Math.min(MAX_SHUFFLES, existingShuffleCount));
+    }
+
+    public int getShuffleCount() {
+        return shuffleCount;
+    }
+
     //helper
 
 
     private void callAiForQuiz(String topicText,
                                java.util.function.Consumer<List<QuizQuestion>> onSuccess,
                                java.util.function.Consumer<Exception> onError) {
-        // TODO: Replace with actual AI API call.
-
-        // Placeholder — generates 3 dummy questions for testing:
-        List<QuizQuestion> placeholder = new ArrayList<>();
-        for (int i = 1; i <= 3; i++) {
-            placeholder.add(new QuizQuestion(
-                    "Question " + i + " about: " +
-                            topicText.substring(0, Math.min(20, topicText.length())),
-                    List.of("A. Option one", "B. Option two",
-                            "C. Option three", "D. Option four"),
-                    "A"
-            ));
-        }
-        onSuccess.accept(placeholder);
+        // Do the network call off the JavaFX thread so the UI doesn't freeze.
+        new Thread(() -> {
+            try {
+                if (AiService.isConfigured()) {
+                    List<QuizQuestion> generated = AiService.generateQuiz(topicText, QUESTIONS_PER_QUIZ);
+                    if (generated == null || generated.isEmpty()) {
+                        javafx.application.Platform.runLater(() -> onError.accept(new RuntimeException(
+                                "AI quiz generation returned no questions. Check your network, GEMINI_API_KEY, "
+                                        + "and Gemini quota.")));
+                        return;
+                    }
+                    javafx.application.Platform.runLater(() -> onSuccess.accept(generated));
+                } else {
+                    // No API key configured — fall back to local template bank.
+                    List<QuizQuestion> generated = QuizQuestionBank.generate(topicText, QUESTIONS_PER_QUIZ);
+                    javafx.application.Platform.runLater(() -> onSuccess.accept(generated));
+                }
+            } catch (Exception e) {
+                javafx.application.Platform.runLater(() -> onError.accept(e));
+            }
+        }, "ai-quiz-gen").start();
     }
 }

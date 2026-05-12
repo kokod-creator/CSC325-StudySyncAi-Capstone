@@ -31,7 +31,7 @@ public class FirestoreService {
                     .add(data)
                     .get(); // wait for completion
 
-            System.out.println("✅ Document added to Firestore!");
+            System.out.println(" Document added to Firestore!");
 
         } catch (Exception e) {
             e.printStackTrace();

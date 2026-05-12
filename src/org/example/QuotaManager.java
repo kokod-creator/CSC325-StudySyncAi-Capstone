@@ -5,16 +5,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class QuotaManager {
 
-    public static final int MAX_REQUESTS_PER_WINDOW = 10;
-    private static final long WINDOW_DURATION_MS = 48L * 60 * 60 * 1000;
+    public enum Resource {
+        DOCUMENT,
+        SUMMARY,
+        QUIZ
+    }
 
+    public static final int MAX_PER_WINDOW = 4;
+    private static final long WINDOW_DURATION_MS = 48L * 60 * 60 * 1000;
 
     private static final Map<String, QuotaState> QUOTAS = new ConcurrentHashMap<>();
 
     private final String userId;
 
     public QuotaManager(String userId) {
-
         this.userId = userId;
     }
 
@@ -27,28 +31,26 @@ public class QuotaManager {
         void onResult(long millisRemaining);
     }
 
-
-
-    public void checkAndIncrement(QuotaCallback callback) {
+    public void checkAndIncrement(Resource resource, QuotaCallback callback) {
         try {
-            QuotaResult result = updateQuota(true);
-            callback.onResult(result.allowed, result.usedCount, MAX_REQUESTS_PER_WINDOW);
+            QuotaResult result = updateQuota(resource, true);
+            callback.onResult(result.allowed, result.usedCount, MAX_PER_WINDOW);
         } catch (Exception e) {
             callback.onError(e);
         }
     }
 
-    public void getQuotaStatus(QuotaCallback callback) {
+    public void getQuotaStatus(Resource resource, QuotaCallback callback) {
         try {
-            QuotaResult result = updateQuota(false);
-            callback.onResult(result.allowed, result.usedCount, MAX_REQUESTS_PER_WINDOW);
+            QuotaResult result = updateQuota(resource, false);
+            callback.onResult(result.allowed, result.usedCount, MAX_PER_WINDOW);
         } catch (Exception e) {
             callback.onError(e);
         }
     }
 
-    public void getTimeUntilReset(TimeCallback callback) {
-        QuotaState state = QUOTAS.get(userId);
+    public void getTimeUntilReset(Resource resource, TimeCallback callback) {
+        QuotaState state = QUOTAS.get(key(resource));
         if (state == null) {
             callback.onResult(0);
             return;
@@ -60,8 +62,8 @@ public class QuotaManager {
         }
     }
 
-    private QuotaResult updateQuota(boolean increment) {
-        QuotaState state = QUOTAS.computeIfAbsent(userId, ignored -> new QuotaState());
+    private QuotaResult updateQuota(Resource resource, boolean increment) {
+        QuotaState state = QUOTAS.computeIfAbsent(key(resource), ignored -> new QuotaState());
 
         synchronized (state) {
             long now = System.currentTimeMillis();
@@ -70,7 +72,7 @@ public class QuotaManager {
                 state.usageCount = 0;
             }
 
-            if (state.usageCount >= MAX_REQUESTS_PER_WINDOW) {
+            if (state.usageCount >= MAX_PER_WINDOW) {
                 return new QuotaResult(false, state.usageCount);
             }
 
@@ -80,6 +82,10 @@ public class QuotaManager {
 
             return new QuotaResult(true, state.usageCount);
         }
+    }
+
+    private String key(Resource resource) {
+        return userId + ":" + resource.name();
     }
 
     private static class QuotaState {

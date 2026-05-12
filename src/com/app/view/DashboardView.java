@@ -3,6 +3,7 @@ package com.app.view;
 import com.app.model.Document;
 import com.app.navigation.SceneManager;
 import com.app.service.MockDataService;
+import com.app.service.UserSession;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -27,7 +28,7 @@ public class DashboardView extends BorderPane {
         Button coursesBtn = new Button("📚 Courses");
         Button documentsBtn = new Button("📄 Documents");
         Button quizBtn = new Button("🧠 Quiz");
-        Button summaryBtn = new Button("📝 Summary");
+        Button summaryBtn = new Button("📝 Study Guide");
 
         Button[] buttons = {
                 uploadBtn,
@@ -79,7 +80,7 @@ public class DashboardView extends BorderPane {
         welcome.getStyleClass().add("section-title");
 
         Label sub = new Label(
-                "Welcome back, Asad. Here’s your study overview."
+                "Welcome back, " + UserSession.getUsername() + ". Here’s your study overview."
         );
 
         // ---- STATS CARD ----

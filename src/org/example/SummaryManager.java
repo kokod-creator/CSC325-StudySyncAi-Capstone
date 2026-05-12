@@ -34,7 +34,7 @@ public class SummaryManager {
 
 
     public void generateSummary(String topicId, String topicText, SummaryCallback callback) {
-        quotaManager.checkAndIncrement(new QuotaManager.QuotaCallback() {
+        quotaManager.checkAndIncrement(QuotaManager.Resource.SUMMARY, new QuotaManager.QuotaCallback() {
             @Override
             public void onResult(boolean allowed, int usedCount, int maxCount) {
 
@@ -43,9 +43,15 @@ public class SummaryManager {
                     return;
                 }
 
-                 String summaryText = createSummary(topicText, 0);
-                   saveSummary(topicId, topicText, summaryText, 0);
-                callback.onSuccess(summaryText);
+                new Thread(() -> {
+                    try {
+                        String summaryText = createSummary(topicText, 0);
+                        saveSummary(topicId, topicText, summaryText, 0);
+                        javafx.application.Platform.runLater(() -> callback.onSuccess(summaryText));
+                    } catch (Exception e) {
+                        javafx.application.Platform.runLater(() -> callback.onError(e));
+                    }
+                }, "ai-summary-gen").start();
             }
 
             @Override
@@ -73,12 +79,7 @@ public class SummaryManager {
         SummaryRecord existing = SUMMARIES.get(summaryKey(topicId));
         int currentRegens = existing == null ? 0 : existing.regenCount();
 
-        if (currentRegens >= MAX_SUMMARIES_PER_NOTE) {
-            callback.onQuotaExceeded(currentRegens, MAX_SUMMARIES_PER_NOTE);
-            return;
-        }
-
-        quotaManager.checkAndIncrement(new QuotaManager.QuotaCallback() {
+        quotaManager.checkAndIncrement(QuotaManager.Resource.SUMMARY, new QuotaManager.QuotaCallback() {
             @Override
             public void onResult(boolean allowed, int usedCount, int maxCount) {
                 if (!allowed) {
@@ -87,9 +88,15 @@ public class SummaryManager {
                 }
 
                 int newRegenCount = currentRegens + 1;
-                String summaryText = createSummary(topicText, newRegenCount);
-                saveSummary(topicId, topicText, summaryText, newRegenCount);
-                callback.onSuccess(summaryText);
+                new Thread(() -> {
+                    try {
+                        String summaryText = createSummary(topicText, newRegenCount);
+                        saveSummary(topicId, topicText, summaryText, newRegenCount);
+                        javafx.application.Platform.runLater(() -> callback.onSuccess(summaryText));
+                    } catch (Exception e) {
+                        javafx.application.Platform.runLater(() -> callback.onError(e));
+                    }
+                }, "ai-summary-regen").start();
             }
 
             @Override
@@ -112,7 +119,7 @@ public class SummaryManager {
     public int getSummariesRemaining(String topicId) {
         SummaryRecord record = SUMMARIES.get(summaryKey(topicId));
         int used = record == null ? 0 : record.regenCount();
-        return Math.max(0, MAX_SUMMARIES_PER_NOTE - used);
+        return Math.max(0, QuotaManager.MAX_PER_WINDOW - used);
     }
 
     private void saveSummary(String topicId, String topicText, String summaryText, int regenCount) {
@@ -121,6 +128,22 @@ public class SummaryManager {
     }
 
     private String createSummary(String topicText, int improvementLevel) {
+        if (AiService.isConfigured()) {
+            String prompt = topicText;
+            if (improvementLevel > 0) {
+                prompt = "Improved version " + improvementLevel + " — make this clearer, sharper, "
+                        + "and easier to remember for an exam, while staying ONLY within the document's content:\n"
+                        + topicText;
+            }
+            String aiSummary = AiService.generateSummary(prompt);
+            if (aiSummary == null || aiSummary.isBlank()) {
+                throw new RuntimeException("AI study guide generation returned no content. "
+                        + "Check your network, GEMINI_API_KEY, and Gemini quota.");
+            }
+            return aiSummary;
+        }
+
+        // No API key configured — produce a minimal placeholder so the app still works offline.
         String cleanText = topicText == null ? "" : topicText.trim();
         String focus = cleanText.length() > 120 ? cleanText.substring(0, 120) + "..." : cleanText;
 

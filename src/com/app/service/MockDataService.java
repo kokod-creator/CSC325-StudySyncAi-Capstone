@@ -2,6 +2,7 @@ package com.app.service;
 
 import com.app.model.Course;
 import com.app.model.Document;
+import com.app.model.GeneratedStudyMaterial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ public class MockDataService {
 
     public static List<Course> courses = new ArrayList<>();
     public static List<Document> documents = new ArrayList<>();
+    public static List<GeneratedStudyMaterial> recentStudyMaterials = new ArrayList<>();
 
     //  STATIC DATA (already exists)
     static {
@@ -35,5 +37,13 @@ public class MockDataService {
         }
 
         return documents.subList(size - limit, size);
+    }
+
+    public static List<GeneratedStudyMaterial> getRecentStudyMaterials(int limit) {
+        int size = recentStudyMaterials.size();
+        if (size <= limit) {
+            return new ArrayList<>(recentStudyMaterials);
+        }
+        return new ArrayList<>(recentStudyMaterials.subList(size - limit, size));
     }
 }

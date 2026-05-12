@@ -1,9 +1,15 @@
 package com.app.view;
 
+import com.app.model.GeneratedStudyMaterial;
 import com.app.navigation.SceneManager;
+import com.app.service.MockDataService;
+import com.app.service.UserSession;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -14,27 +20,43 @@ import java.util.List;
 
 public class QuizView extends BorderPane {
 
-    private static final String USER_ID = "demo-user";
-
-    private final QuizManager quizManager = new QuizManager(USER_ID);
+    private final QuizManager quizManager = new QuizManager(UserSession.getUserId());
 
     public QuizView() {
 
         VBox box = new VBox(15);
         box.getStyleClass().add("card");
-        box.setMaxWidth(700);
+        box.setMaxWidth(750);
         box.setAlignment(Pos.TOP_CENTER);
 
-        Label title = new Label("Quiz Generator");
+        Label title = new Label("Your Quizzes");
         title.getStyleClass().add("section-title");
 
-        TextArea topicInput = new TextArea();
-        topicInput.setPromptText("Paste notes or a topic to generate quiz questions from...");
-        topicInput.setPrefRowCount(5);
-        topicInput.setWrapText(true);
+        Label hint = new Label(
+                "Pick a recent quiz, or upload a new document to generate one."
+        );
+
+        List<GeneratedStudyMaterial> recent = MockDataService.getRecentStudyMaterials(10);
+        ObservableList<GeneratedStudyMaterial> items = FXCollections.observableArrayList(recent);
+
+        ListView<GeneratedStudyMaterial> list = new ListView<>(items);
+        list.setPrefHeight(160);
+        list.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(GeneratedStudyMaterial item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.documentTitle + "  —  " + item.courseCode);
+                }
+            }
+        });
 
         TextArea quizOutput = new TextArea();
-        quizOutput.setPromptText("Generated questions will appear here.");
+        quizOutput.setPromptText(items.isEmpty()
+                ? "No quizzes yet. Upload a document to generate your first one."
+                : "Select a quiz to view it.");
         quizOutput.setEditable(false);
         quizOutput.setWrapText(true);
         quizOutput.setPrefRowCount(12);
@@ -42,50 +64,47 @@ public class QuizView extends BorderPane {
         Label status = new Label();
         Label shufflesLabel = new Label("Shuffles available: " + QuizManager.MAX_SHUFFLES);
 
-        Button generate = new Button("Generate Quiz");
-        generate.getStyleClass().add("button");
-
         Button shuffle = new Button("Shuffle Questions");
         shuffle.getStyleClass().add("button-secondary");
         shuffle.setDisable(true);
 
-        generate.setOnAction(e -> {
-            String topic = topicInput.getText().trim();
-            if (topic.isEmpty()) {
-                status.setText("Enter some topic text first.");
+        final GeneratedStudyMaterial[] selectedRef = new GeneratedStudyMaterial[1];
+
+        list.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
+            selectedRef[0] = newV;
+            if (newV == null) {
+                quizOutput.clear();
+                shuffle.setDisable(true);
                 return;
             }
-            status.setText("Generating quiz...");
-            quizManager.generateQuiz(topic, new QuizManager.QuizCallback() {
-                @Override
-                public void onSuccess(List<QuizManager.QuizQuestion> questions, int shufflesRemaining) {
-                    quizOutput.setText(renderQuiz(questions));
-                    shufflesLabel.setText("Shuffles available: " + shufflesRemaining);
-                    shuffle.setDisable(shufflesRemaining <= 0);
-                    status.setText("Quiz generated.");
-                }
-
-                @Override
-                public void onQuotaExceeded(int usedCount, int maxCount) {
-                    status.setText("Daily AI quota reached (" + usedCount + " / " + maxCount + ").");
-                }
-
-                @Override
-                public void onError(Exception ex) {
-                    status.setText("Quiz failed: " + ex.getMessage());
-                }
-            });
+            quizOutput.setText(newV.quizText);
+            // Load saved questions and the quiz's persisted shuffle count.
+            quizManager.loadQuestions(newV.questions, newV.shuffleCount);
+            int shufflesRemaining = quizManager.getShufflesRemaining();
+            shufflesLabel.setText("Shuffles available: " + shufflesRemaining + " / " + QuizManager.MAX_SHUFFLES);
+            shuffle.setDisable(!quizManager.canShuffle());
+            status.setText("Loaded quiz for " + newV.documentTitle + ".");
         });
 
         shuffle.setOnAction(e -> quizManager.shuffleQuiz(new QuizManager.ShuffleCallback() {
             @Override
             public void onShuffled(List<QuizManager.QuizQuestion> shuffledQuestions, int shufflesRemaining) {
-                quizOutput.setText(renderQuiz(shuffledQuestions));
-                shufflesLabel.setText("Shuffles available: " + shufflesRemaining);
+                String rendered = renderQuiz(shuffledQuestions);
+                quizOutput.setText(rendered);
+                shufflesLabel.setText("Shuffles available: " + shufflesRemaining + " / " + QuizManager.MAX_SHUFFLES);
                 shuffle.setDisable(shufflesRemaining <= 0);
                 status.setText(shufflesRemaining == 0
                         ? "Shuffled. No more shuffles available."
                         : "Shuffled. " + shufflesRemaining + " left.");
+
+                // Persist the new order and shuffle count back to the saved quiz.
+                GeneratedStudyMaterial mat = selectedRef[0];
+                if (mat != null) {
+                    mat.questions.clear();
+                    mat.questions.addAll(shuffledQuestions);
+                    mat.quizText = rendered;
+                    mat.shuffleCount = quizManager.getShuffleCount();
+                }
             }
 
             @Override
@@ -95,14 +114,18 @@ public class QuizView extends BorderPane {
             }
         }));
 
-        HBox buttons = new HBox(10, generate, shuffle);
-        buttons.setAlignment(Pos.CENTER);
+        Button uploadNew = new Button("Upload a new document");
+        uploadNew.getStyleClass().add("button");
+        uploadNew.setOnAction(e -> SceneManager.showUpload());
 
         Button back = new Button("Back");
         back.getStyleClass().add("button-secondary");
         back.setOnAction(e -> SceneManager.showDashboard());
 
-        box.getChildren().addAll(title, topicInput, buttons, shufflesLabel, status, quizOutput, back);
+        HBox buttons = new HBox(10, uploadNew, shuffle, back);
+        buttons.setAlignment(Pos.CENTER);
+
+        box.getChildren().addAll(title, hint, list, buttons, shufflesLabel, status, quizOutput);
 
         setCenter(box);
     }

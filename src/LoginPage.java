@@ -5,6 +5,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.app.navigation.SceneManager;
+import com.app.service.UserProfileService;
+import com.app.service.UserSession;
 
 public class LoginPage {
 
@@ -64,6 +66,7 @@ public class LoginPage {
 
             if (guestRadio.isSelected()) {
                 SessionManager.startGuestSession();
+                UserSession.setUsername("Guest");
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Guest login successful.");
                 System.out.println("Logged in as Guest");
@@ -83,6 +86,10 @@ public class LoginPage {
 
             if (result.isSuccess()) {
                 SessionManager.startStudentSession(result.getEmail(), result.getIdToken());
+                String savedName = UserProfileService.loadName(result.getLocalId());
+                UserSession.setUsername(
+                        savedName != null ? savedName : displayNameFromEmail(result.getEmail())
+                );
                 messageLabel.setStyle("-fx-text-fill: green;");
                 messageLabel.setText("Student login successful.");
                 System.out.println("Logged in as student: " + result.getEmail());
@@ -119,5 +126,27 @@ public class LoginPage {
             scene.getStylesheets().add(css.toExternalForm());
         }
         return scene;
+    }
+
+    private static String displayNameFromEmail(String email) {
+        if (email == null || email.isEmpty()) return "Student";
+        int at = email.indexOf('@');
+        String local = at > 0 ? email.substring(0, at) : email;
+        local = local.replace('.', ' ').replace('_', ' ').replace('-', ' ').trim();
+        if (local.isEmpty()) return "Student";
+        StringBuilder out = new StringBuilder(local.length());
+        boolean capitalizeNext = true;
+        for (char c : local.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                out.append(c);
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                out.append(Character.toUpperCase(c));
+                capitalizeNext = false;
+            } else {
+                out.append(c);
+            }
+        }
+        return out.toString();
     }
 }

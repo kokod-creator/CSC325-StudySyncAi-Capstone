@@ -56,13 +56,14 @@ public class AuthService {
             if (response.statusCode() == 200) {
                 String email = extractValue(body, "email");
                 String idToken = extractValue(body, "idToken");
-                return new AuthResult(true, "Success", email, idToken);
+                String localId = extractValue(body, "localId");
+                return new AuthResult(true, "Success", email, idToken, localId);
             } else {
                 String errorMessage = parseFirebaseError(body);
-                return new AuthResult(false, errorMessage, null, null);
+                return new AuthResult(false, errorMessage, null, null, null);
             }
         } catch (IOException | InterruptedException e) {
-            return new AuthResult(false, "Connection error: " + e.getMessage(), null, null);
+            return new AuthResult(false, "Connection error: " + e.getMessage(), null, null, null);
         }
     }
 
@@ -91,12 +92,14 @@ public class AuthService {
         private final String message;
         private final String email;
         private final String idToken;
+        private final String localId;
 
-        public AuthResult(boolean success, String message, String email, String idToken) {
+        public AuthResult(boolean success, String message, String email, String idToken, String localId) {
             this.success = success;
             this.message = message;
             this.email = email;
             this.idToken = idToken;
+            this.localId = localId;
         }
 
         public boolean isSuccess() {
@@ -113,6 +116,10 @@ public class AuthService {
 
         public String getIdToken() {
             return idToken;
+        }
+
+        public String getLocalId() {
+            return localId;
         }
     }
 }
