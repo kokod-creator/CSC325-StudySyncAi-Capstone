@@ -35,7 +35,6 @@ StudySync AI,  is a desktop application designed to help students organize study
 
 ```text
 src/
- ├── com/app/
  │    ├── Main.java
  │    ├── LoginPage.java
  │    ├── RegisterPage.java
@@ -53,7 +52,25 @@ src/
  │    └── QuotaTrackingService.java
  │
  └── org/example/
-      ├── QuizManager.java
-      ├── SummaryManager.java
-      ├── QuotaManager.java
-      └── StudyController.java
+ │    ├── AiService
+ │    ├── QuizManager.java
+ │    ├── QuizQuestionBank.java
+ │    ├── QuotaManager.java
+ │    ├── StudyController.java
+ │    └── SummaryManager.java
+ └── style/
+ │    ├──LogEntry
+ │    ├──LoginForm 
+ │    ├──RegisterForm
+ │    ├──SplashScreen
+ │    ├──style.css
+ │    └──StyleDemoApp
+ └──
+
+
+
+
+
+
+
+
